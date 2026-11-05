@@ -11,6 +11,7 @@ Built solo for the **Geek Room Global AI Hackathon 2026**.
 | Primary problem statement | **Build a Benchmarking Platform for AI Agents, Not Just Models** (Bifrost track) |
 | Integrated Tavily problem statement | **Build a Stale-Answer Detector for AI Applications** |
 | Gateway | [Bifrost](https://github.com/maximhq/bifrost) `transports/v2.4.0`, self-hosted, binary (no Docker needed locally) |
+| Live demo | https://stalebench.onrender.com (Render free tier; first load can take ~1 min to wake) |
 | Search | [Tavily](https://tavily.com) Search + Extract |
 | Model | Gemini (primary + backup) via Bifrost's `gemini` provider |
 
@@ -74,6 +75,23 @@ Config is generated at startup in `stalebench/gateway.py` and written to Bifrost
 - **The tool under test:** every research agent searches (and the SDK agent also extracts pages) through Tavily via the harness proxy, which is where tool faults and poisoned results are injected.
 - **The evidence behind grading:** the Stale-Answer Detector re-checks every time-sensitive claim with a live Tavily search (`include_answer`, top 5 results) and shows the sources next to each verdict.
 - **Fair repeats, fewer credits:** identical queries are cached for 6 hours, so every repeat of a task sees the same evidence and credits are spent once.
+
+## Results: first live run (2026-11-05)
+
+Real run on the public Render deploy: 4 agents × 3 tasks (`python-stable`, `node-lts`, `bifrost-version`) × 5 scenarios × 1 repeat = 60 runs, Gemini `gemini-3.6-flash` (fallback `gemini-3.5-flash-lite`) through Bifrost v2.4.0, live Tavily search, Stale-Answer Detector on. Kept deliberately small to stay inside free-tier rate and credit limits. Raw data: [`results/`](results/) (leaderboard, job, and every run's full trace).
+
+| Rank | Agent | Success | 95% Wilson CI | Crashes | Stale traps | baseline | model_down_raw | model_down_gateway | tool_broken | misleading |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | OpenAI SDK tool-caller | 11/15 (73%) | 48–89% | 2 | 1 | 2/3 | 2/3 | 2/3 | 3/3 | 2/3 |
+| 2 | Search-then-answer (Node.js) | 3/15 (20%) | 7–45% | 6 | 4 | 1/3 | 0/3 | 1/3 | 0/3 | 1/3 |
+| 3 | Closed-book LLM | 0/15 (0%) | 0–20% | 5 | 5 | 0/3 | 0/3 | 0/3 | 0/3 | 0/3 |
+| 4 | ReAct (hand-rolled) | 0/15 (0%) | 0–20% | 12 | 0 | 0/3 | 0/3 | 0/3 | 0/3 | 0/3 |
+
+What it shows:
+- **The agent loop matters more than the model.** Same model, same tool: the tool-caller with retries passed 11/15, while the hand-rolled ReAct loop and the one-shot Node agent crashed on any upstream error.
+- **The closed-book control is always stale** (5 stale traps, 0 passes): the model alone believes older versions are current, which is exactly what the detector is for.
+- **Real-world faults showed up on their own.** The run hit 17 genuine HTTP 429 quota responses from the Gemini free tier on top of the injected faults; agents without retry logic crashed on them, which is the reliability gap this benchmark is built to expose.
+- With 1 repeat per cell the intervals are wide; rerun with `--repeats 3` or more on a paid key for tighter rankings.
 
 ## The Stale-Answer Detector
 

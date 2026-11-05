@@ -1,0 +1,1 @@
+[{"id":"efe96a3e","total":60,"done":60,"started":1793875504.3617492,"state":"finished","agents":["closed-book","react-raw","openai-tools","node-rag"],"tasks":["python-stable","node-lts","bifrost-version"],"scenarios":["baseline","model_down_raw","model_down_gateway","tool_broken","misleading"],"repeats":1}]
