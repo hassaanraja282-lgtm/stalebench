@@ -11,6 +11,7 @@ Built solo for the **Geek Room Global AI Hackathon 2026**.
 | Primary problem statement | **Build a Benchmarking Platform for AI Agents, Not Just Models** (Bifrost track) |
 | Integrated Tavily problem statement | **Build a Stale-Answer Detector for AI Applications** |
 | Gateway | [Bifrost](https://github.com/maximhq/bifrost) `transports/v2.4.0`, self-hosted, binary (no Docker needed locally) |
+| Demo video | https://youtu.be/I2XsL8BDRCo |
 | Live demo | https://stalebench.onrender.com (Render free tier; first load can take ~1 min to wake) |
 | Search | [Tavily](https://tavily.com) Search + Extract |
 | Model | Gemini (primary + backup) via Bifrost's `gemini` provider |
