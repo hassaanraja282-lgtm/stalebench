@@ -1,0 +1,5 @@
+.git
+.bifrost
+.test-data
+__pycache__
+.pytest_cache

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StaleBench · benchmark research agents on what is true today</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <div class="brand"><span class="logo">◷</span> StaleBench <small>agents, not just models</small></div>
+  <nav>
+    <button data-tab="board" class="on">Leaderboard</button>
+    <button data-tab="matrix">Fault matrix</button>
+    <button data-tab="runs">Runs &amp; traces</button>
+    <button data-tab="detect">Stale-Answer Detector</button>
+    <button data-tab="about">How it works</button>
+  </nav>
+  <div id="health" class="health">…</div>
+</header>
+
+<main>
+<section id="board" class="tab on">
+  <div class="intro">
+    <h1>Which research agent still tells the truth when the world changed last week?</h1>
+    <p>Every agent gets the same time-sensitive questions, the same model through a self-hosted <b>Bifrost</b> gateway and the same <b>Tavily</b> search tool,
+      repeated under injected faults. Answers are graded for the <i>current</i> fact and audited claim-by-claim by the Stale-Answer Detector.
+      Ranking uses the lower bound of a 95% Wilson interval, so one lucky run can't win.</p>
+  </div>
+  <div id="boardTable"></div>
+  <div class="row">
+    <div class="card grow"><h3>Run a benchmark</h3>
+      <div id="benchForm"></div>
+      <div id="jobs"></div>
+    </div>
+  </div>
+</section>
+
+<section id="matrix" class="tab">
+  <h2>Success rate by fault scenario</h2>
+  <p class="muted">Each cell: successes / runs across all tasks and repeats. Faults are injected by the harness proxy; agents run unmodified.</p>
+  <div id="matrixTable"></div>
+  <div id="scenarioList" class="grid"></div>
+</section>
+
+<section id="runs" class="tab">
+  <div class="filters">
+    <select id="fAgent"><option value="">all agents</option></select>
+    <select id="fScenario"><option value="">all scenarios</option></select>
+    <select id="fTask"><option value="">all tasks</option></select>
+  </div>
+  <div class="split">
+    <div id="runList" class="runlist"></div>
+    <div id="trace" class="trace"><p class="muted">Pick a run to inspect its step-by-step trace.</p></div>
+  </div>
+</section>
+
+<section id="detect" class="tab">
+  <h2>Stale-Answer Detector</h2>
+  <p class="muted">Paste any LLM answer. Bifrost extracts the claims and flags the time-sensitive ones, Tavily re-checks each against the live web,
+     and every claim gets a verdict, a freshness score and its sources. Evidence (what the sources say) is shown apart from inference (what the model concluded).</p>
+  <textarea id="answerIn" rows="6">Python 3.12 is the newest stable Python release, Node.js 20 is the current Active LTS line, and the RBI repo rate is 6.5%.</textarea>
+  <button id="detectBtn" class="primary">Check freshness</button>
+  <div id="detectOut"></div>
+</section>
+
+<section id="about" class="tab">
+  <div class="about">
+    <h2>How StaleBench works</h2>
+    <pre class="diagram">
+  agent (any language / framework, unmodified)
+     │  OPENAI_BASE_URL = /proxy/&lt;run&gt;/v1        TAVILY_BASE_URL = /proxy/&lt;run&gt;/tavily
+     ▼                                              ▼
+  ┌──────────────── harness proxy (records every step, injects faults) ────────────────┐
+  │  LLM: pin model · 503s · dead primary            Tool: 500s · poisoned top result     │
+  └──────────────┬───────────────────────────────────────────────┬──────────────────────┘
+                 ▼                                               ▼
+        Bifrost gateway (self-hosted)                      Tavily Search / Extract
+        virtual key + daily budget · fallbacks             live web evidence
+        Gemini primary → backup model · logs
+                 │                                               │
+                 └──────────► Stale-Answer Detector ◄────────────┘
+                              claims → live re-check → verdict + freshness
+                                         ▼
+                      grade · Wilson CI ranking · traces · dashboard</pre>
+    <div class="grid">
+      <div class="card"><h3>Bifrost does</h3><ul>
+        <li>One OpenAI-compatible endpoint, so agents need no changes</li>
+        <li>Fallback chain that rescues runs when the primary provider is down</li>
+        <li>Routing info per call: which model really answered</li>
+        <li>Harness virtual key with a daily USD budget</li>
+        <li>All detector reasoning calls</li></ul></div>
+      <div class="card"><h3>Tavily does</h3><ul>
+        <li>The live search &amp; extract tool every agent uses</li>
+        <li>Fresh evidence the detector checks each claim against</li>
+        <li>Ground-truth drift checks for the task suite</li>
+        <li>Cached per query so repeats see the same evidence and spend credits once</li></ul></div>
+    </div>
+  </div>
+</section>
+</main>
+<div id="toast"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

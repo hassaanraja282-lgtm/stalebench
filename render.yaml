@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: stalebench
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: BIFROST_BUDGET_USD
+        value: "2"

@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.bifrost/
+.test-data/
+data/tavily-cache/
+.env
+.pytest_cache/
+node_modules/

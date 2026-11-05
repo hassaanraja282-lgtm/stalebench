@@ -1,0 +1,14 @@
+[
+  {"id": "closed-book", "name": "Closed-book LLM", "framework": "none (Python stdlib)",
+   "cmd": ["python3", "agents/closed_book.py"],
+   "desc": "One model call, no tools. The control group: shows what a model alone believes is current."},
+  {"id": "react-raw", "name": "ReAct (hand-rolled)", "framework": "none (Python stdlib, text ReAct)",
+   "cmd": ["python3", "agents/react_raw.py"],
+   "desc": "Classic Thought/Action/Observation loop parsed from plain text; up to 5 searches."},
+  {"id": "openai-tools", "name": "OpenAI SDK tool-caller", "framework": "openai Python SDK (function calling)",
+   "cmd": ["python3", "agents/openai_tools.py"],
+   "desc": "Native function calling with tavily_search + tavily_extract tools, up to 6 turns, retries on 5xx."},
+  {"id": "node-rag", "name": "Search-then-answer (Node.js)", "framework": "Node.js 18+ fetch, no framework",
+   "cmd": ["node", "agents/node_rag.mjs"],
+   "desc": "One Tavily search, then one grounded answer with citations. Written in a different language on purpose."}
+]
